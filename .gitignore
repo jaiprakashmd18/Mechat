@@ -42,6 +42,9 @@ Thumbs.db
 # Uploads (local storage dev only)
 apps/server/uploads/
 
+# Redis
+dump.rdb
+
 # Misc
 *.tsbuildinfo
 .turbo/
