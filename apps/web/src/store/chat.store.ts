@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { Chat, Message } from '@/types';
+import type { Chat, Message, ReceiptStatus, UserStatus } from '@/types';
 
 interface ChatState {
   chats: Chat[];
@@ -16,6 +16,11 @@ interface ChatState {
   removeMessage: (chatId: string, messageId: string) => void;
   setTyping: (chatId: string, userId: string, isTyping: boolean) => void;
   markChatRead: (chatId: string) => void;
+  incrementUnread: (chatId: string) => void;
+  updateReceiptByMessageId: (messageId: string, userId: string, status: ReceiptStatus) => void;
+  markMessagesSeenInChat: (chatId: string, byUserId: string) => void;
+  updatePresence: (userId: string, status: UserStatus, lastSeenAt?: string | null) => void;
+  applyReactionEvent: (messageId: string, userId: string, emoji: string, action: 'add' | 'remove') => void;
 }
 
 export const useChatStore = create<ChatState>((set) => ({
@@ -79,4 +84,72 @@ export const useChatStore = create<ChatState>((set) => ({
 
   markChatRead: (chatId) =>
     set((s) => ({ chats: s.chats.map((c) => (c.id === chatId ? { ...c, unreadCount: 0 } : c)) })),
+
+  incrementUnread: (chatId) =>
+    set((s) => ({ chats: s.chats.map((c) => (c.id === chatId ? { ...c, unreadCount: (c.unreadCount ?? 0) + 1 } : c)) })),
+
+  updateReceiptByMessageId: (messageId, userId, status) =>
+    set((s) => {
+      for (const chatId of Object.keys(s.messagesByChat)) {
+        const messages = s.messagesByChat[chatId];
+        const idx = messages.findIndex((m) => m.id === messageId);
+        if (idx === -1) continue;
+        const message = messages[idx];
+        const receipts = message.receipts ? [...message.receipts] : [];
+        const rIdx = receipts.findIndex((r) => r.userId === userId);
+        if (rIdx === -1) receipts.push({ userId, status });
+        else if (receipts[rIdx].status !== 'SEEN') receipts[rIdx] = { userId, status };
+        const nextMessages = [...messages];
+        nextMessages[idx] = { ...message, receipts };
+        return { messagesByChat: { ...s.messagesByChat, [chatId]: nextMessages } };
+      }
+      return {};
+    }),
+
+  markMessagesSeenInChat: (chatId, byUserId) =>
+    set((s) => {
+      const messages = s.messagesByChat[chatId];
+      if (!messages) return {};
+      const updated = messages.map((m) => {
+        if (m.senderId === byUserId) return m;
+        const receipts = m.receipts ? [...m.receipts] : [];
+        const rIdx = receipts.findIndex((r) => r.userId === byUserId);
+        if (rIdx === -1) receipts.push({ userId: byUserId, status: 'SEEN' });
+        else receipts[rIdx] = { userId: byUserId, status: 'SEEN' };
+        return { ...m, receipts };
+      });
+      return { messagesByChat: { ...s.messagesByChat, [chatId]: updated } };
+    }),
+
+  updatePresence: (userId, status, lastSeenAt) =>
+    set((s) => ({
+      chats: s.chats.map((c) => ({
+        ...c,
+        participants: c.participants.map((p) =>
+          p.userId === userId ? { ...p, user: { ...p.user, status, lastSeenAt } } : p
+        ),
+      })),
+    })),
+
+  applyReactionEvent: (messageId, userId, emoji, action) =>
+    set((s) => {
+      for (const chatId of Object.keys(s.messagesByChat)) {
+        const messages = s.messagesByChat[chatId];
+        const idx = messages.findIndex((m) => m.id === messageId);
+        if (idx === -1) continue;
+        const message = messages[idx];
+        let reactions = message.reactions ? [...message.reactions] : [];
+        if (action === 'add') {
+          if (!reactions.some((r) => r.userId === userId && r.emoji === emoji)) {
+            reactions.push({ messageId, userId, emoji });
+          }
+        } else {
+          reactions = reactions.filter((r) => !(r.userId === userId && r.emoji === emoji));
+        }
+        const nextMessages = [...messages];
+        nextMessages[idx] = { ...message, reactions };
+        return { messagesByChat: { ...s.messagesByChat, [chatId]: nextMessages } };
+      }
+      return {};
+    }),
 }));

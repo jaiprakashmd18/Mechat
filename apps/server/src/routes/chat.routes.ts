@@ -5,6 +5,7 @@ import { requireAuth } from '@/middleware/auth';
 import { prisma } from '@/lib/prisma';
 import { createDirectChatSchema, updateChatSchema } from '@/validators/chat.validators';
 import { decryptField } from '@/services/encryption.service';
+import { emitToUser, joinUserToChat } from '@/sockets/emitter';
 
 const router = Router();
 
@@ -129,6 +130,10 @@ router.post(
       },
       include: { participants: true },
     });
+
+    joinUserToChat(req.user!.id, chat.id);
+    joinUserToChat(userId, chat.id);
+    emitToUser(userId, 'chat:new', { chatId: chat.id });
 
     res.status(201).json({ success: true, data: chat });
   }),

@@ -19,8 +19,13 @@ export interface User {
 
 export type ChatType = 'DIRECT' | 'GROUP';
 
-export interface ChatParticipantUser extends Pick<User, 'id' | 'username' | 'displayName' | 'avatarUrl' | 'status' | 'lastSeenAt'> {
+export interface ChatParticipantUser extends Pick<User, 'id' | 'username' | 'displayName' | 'avatarUrl' | 'status' | 'lastSeenAt'> {}
+
+export interface ChatParticipant {
+  id: string;
+  userId: string;
   role?: 'OWNER' | 'ADMIN' | 'MODERATOR' | 'MEMBER';
+  user: ChatParticipantUser;
 }
 
 export interface Chat {
@@ -33,7 +38,7 @@ export interface Chat {
   isPinned?: boolean;
   isArchived?: boolean;
   isMuted?: boolean;
-  participants: ChatParticipantUser[];
+  participants: ChatParticipant[];
   lastMessage?: Message | null;
   unreadCount?: number;
   updatedAt: string;
@@ -87,6 +92,13 @@ export interface Poll {
   options: PollOption[];
 }
 
+export type ReceiptStatus = 'SENT' | 'DELIVERED' | 'SEEN';
+
+export interface MessageReceipt {
+  userId: string;
+  status: ReceiptStatus;
+}
+
 export interface Message {
   id: string;
   chatId: string;
@@ -96,6 +108,7 @@ export interface Message {
   content?: string | null;
   attachments?: MediaAttachment[];
   reactions?: MessageReaction[];
+  receipts?: MessageReceipt[];
   replyToId?: string | null;
   replyTo?: Message | null;
   forwardedFromId?: string | null;

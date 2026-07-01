@@ -18,3 +18,7 @@ export function emitToUser(userId: string, event: string, payload: unknown) {
 export function emitToChat(chatId: string, event: string, payload: unknown) {
   ioInstance?.to(`chat:${chatId}`).emit(event, payload);
 }
+
+export function joinUserToChat(userId: string, chatId: string) {
+  ioInstance?.in(`user:${userId}`).socketsJoin(`chat:${chatId}`);
+}

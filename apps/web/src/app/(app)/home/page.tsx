@@ -1,16 +1,17 @@
 'use client';
 
-import { useAuthStore } from '@/store/auth.store';
+import { MessagesSquare } from 'lucide-react';
 
-export default function HomePage() {
-  const user = useAuthStore((s) => s.user);
-
+export default function HomeIndexPage() {
   return (
-    <main className="flex min-h-screen items-center justify-center p-8">
-      <div className="glass-panel max-w-md p-10 text-center">
-        <h1 className="text-2xl font-semibold">Welcome, {user?.displayName ?? 'there'}</h1>
-        <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">The chat experience is coming up next.</p>
+    <div className="hidden flex-1 flex-col items-center justify-center gap-3 text-center lg:flex">
+      <div className="flex h-16 w-16 items-center justify-center rounded-full bg-brand-600/10 text-brand-600 dark:text-brand-400">
+        <MessagesSquare size={28} />
       </div>
-    </main>
+      <div>
+        <p className="text-lg font-semibold">Select a chat</p>
+        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Choose a conversation from the list or start a new one.</p>
+      </div>
+    </div>
   );
 }
