@@ -140,7 +140,9 @@ The Next.js app includes `apps/web/vercel.json` so Vercel uses the Next.js frame
 
 1. Import the Git repository in Vercel.
 2. Set the Vercel **Root Directory** to `apps/web`.
-3. Set these environment variables in Vercel:
+3. Leave the Vercel **Output Directory** empty or set it to `.next`; the committed `apps/web/vercel.json` also sets `outputDirectory` to `.next` so Vercel does not look for a static `public` output folder.
+4. Set these environment variables in Vercel:
+
 
 | Variable | Description |
 |---|---|
