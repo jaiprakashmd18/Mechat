@@ -133,6 +133,22 @@ The stack exposes:
 | Next.js web | 3000 (internal) |
 | Express API | 4000 (internal) |
 
+
+## Deploying the web app to Vercel
+
+The Next.js app includes `apps/web/vercel.json` so Vercel uses the Next.js framework preset and runs the web build command from the app workspace.
+
+1. Import the Git repository in Vercel.
+2. Set the Vercel **Root Directory** to `apps/web`.
+3. Set these environment variables in Vercel:
+
+| Variable | Description |
+|---|---|
+| `NEXT_PUBLIC_API_URL` | Public HTTPS URL of the deployed Express API, for example `https://api.example.com`. Leave unset only if `/api` is reverse-proxied from the same Vercel domain. |
+| `NEXT_PUBLIC_SOCKET_URL` | Public HTTPS URL for Socket.IO. Defaults to `NEXT_PUBLIC_API_URL` when omitted. |
+
+> The Express + Socket.IO server, PostgreSQL, and Redis services are not deployed by Vercel's static/Next.js hosting flow. Deploy `apps/server` to a long-running Node host (Fly.io, Render, Railway, a VPS, or Docker) and point the Vercel variables above at that API origin.
+
 ## API overview
 
 Base URL: `/api`
