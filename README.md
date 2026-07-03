@@ -143,6 +143,7 @@ The Next.js app includes `apps/web/vercel.json` so Vercel uses the Next.js frame
 3. Leave the Vercel **Output Directory** empty or set it to `.next`; the committed `apps/web/vercel.json` also sets `outputDirectory` to `.next` so Vercel does not look for a static `public` output folder.
 4. Set these environment variables in Vercel:
 
+
 | Variable | Description |
 |---|---|
 | `NEXT_PUBLIC_API_URL` | Public HTTPS URL of the deployed Express API, for example `https://api.example.com`. Leave unset only if `/api` is reverse-proxied from the same Vercel domain. |
